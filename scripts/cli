@@ -386,6 +386,14 @@ function scaffold() {
             migrate_local
             exit
             ;;
+        parse-locations)
+            parse_locations
+            exit
+            ;;
+        geocode-locations)
+            geocode_locations
+            exit
+            ;;
         up-test)
             up_test_scaffold
             exit

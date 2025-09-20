@@ -16,4 +16,18 @@ export class DashboardApiService {
 
     return response.data;
   }
+
+  static async fetchLocationMapData({ type = 'both', segments = [] }) {
+    const response = await authAxios.get(
+      '/dashboard/location-map',
+      {
+        params: {
+          type,
+          segments: segments.join(','),
+        },
+      },
+    );
+
+    return response.data;
+  }
 }

@@ -24,7 +24,7 @@
         <lf-button
           type="primary"
           size="medium"
-          :disabled="!selectedIdentity || !preview"
+          :disabled="!currentSelectedIdentity || !preview"
           :loading="unmerging"
           @click="unmerge()"
         >
@@ -43,7 +43,7 @@
                 v-model="revertPreviousMerge"
                 class="text-gray-900 text-xs"
                 size="tiny"
-                @update:model-value="fetchPreview(selectedIdentity!)"
+                @update:model-value="fetchPreview(currentSelectedIdentity!)"
               >
                 Revert previous merge
               </lf-switch>
@@ -179,7 +179,7 @@
                             :key="i.id"
                           >
                             <el-dropdown-item
-                              v-if="i.id !== selectedIdentity"
+                              v-if="i.id !== currentSelectedIdentity"
                               :value="i.id"
                               :label="i.value"
                               @click="changeIdentity(i.id)"
@@ -336,7 +336,7 @@ const preview = ref<{
   primary: Contributor,
   secondary: Contributor,
 } | null>(null);
-const selectedIdentity = ref<string | null>(null);
+const currentSelectedIdentity = ref<string | null>(null);
 
 const isModalOpen = computed({
   get() {
@@ -345,7 +345,7 @@ const isModalOpen = computed({
   set() {
     emit('update:modelValue', null);
     fetchingPreview.value = false;
-    selectedIdentity.value = null;
+    currentSelectedIdentity.value = null;
     preview.value = null;
   },
 });
@@ -362,7 +362,7 @@ const identities = computed(() => (props.modelValue.identities || [])
   }));
 
 const changeIdentity = (identityId: string) => {
-  selectedIdentity.value = identityId;
+  currentSelectedIdentity.value = identityId;
   resetRevertPreviousMerge();
   getCanRevertMerge(identityId);
   fetchPreview(identityId);
@@ -410,7 +410,7 @@ const unmerge = () => {
     key: FeatureEventKey.UNMERGE_MEMBER_IDENTITY,
     type: EventType.FEATURE,
     properties: {
-      identity: selectedIdentity.value,
+      identity: currentSelectedIdentity.value,
     },
   });
 

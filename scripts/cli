@@ -296,46 +296,6 @@ function create_product_migration() {
     yell "Created ${MIG_FILE}"
 }
 
-function parse_location_data() {
-    say "Parsing existing location data for world map support..."
-    
-    say "Building crowd flyway migration image..."
-    docker build $DOCKER_PLATFORM_FLAGS -t crowd_flyway -f $CLI_HOME/../backend/src/database/Dockerfile.flyway $CLI_HOME/../backend/src/database --load
-    
-    say "Running location data parsing migration..."
-    docker run --rm --network "${PROJECT_NAME}-bridge" \
-        -e PGHOST=db \
-        -e PGPORT=5432 \
-        -e PGUSER=postgres \
-        -e PGPASSWORD=example \
-        -e PGDATABASE=crowd-web \
-        crowd_flyway
-    
-    say "Location data parsing completed for world map feature!"
-}
-
-function geocode_locations() {
-    say "Starting geocoding process for world map coordinates..."
-    
-    # Check if geocoding service is available
-    if [[ -z "$GEOCODING_API_KEY" ]]; then
-        yell "Warning: GEOCODING_API_KEY not set. Using basic country code parsing only."
-    fi
-    
-    say "Running geocoding update for members and organizations..."
-    docker run --rm --network "${PROJECT_NAME}-bridge" \
-        -e PGHOST=db \
-        -e PGPORT=5432 \
-        -e PGUSER=postgres \
-        -e PGPASSWORD=example \
-        -e PGDATABASE=crowd-web \
-        -e GEOCODING_API_KEY=${GEOCODING_API_KEY:-""} \
-        postgres psql postgresql://postgres:example@db:5432/crowd-web \
-        -c "SELECT parse_location_to_country_code(attributes->'location'->>'default') FROM members WHERE attributes->'location'->>'default' IS NOT NULL LIMIT 10;"
-    
-    say "Geocoding process completed!"
-}
-
 function build_and_publish() {
     VERSION="$2"
 
@@ -391,7 +351,7 @@ function restore_db_backup() {
 }
 
 function scaffold() {
-    HELP="${RESET}\nUsage:\n ./cli scaffold [ up | down | destroy | reset | create-migration | create-product-migration | migrate-up | parse-locations | geocode-locations ]\n"
+    HELP="${RESET}\nUsage:\n ./cli scaffold [ up | down | destroy | reset ]\n"
 
     [[ -z "$1" ]] && say "$HELP" && exit 1
 
@@ -427,7 +387,7 @@ function scaffold() {
             exit
             ;;
         parse-locations)
-            parse_location_data
+            parse_locations
             exit
             ;;
         geocode-locations)

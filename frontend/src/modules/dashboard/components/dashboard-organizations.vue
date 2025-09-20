@@ -189,26 +189,58 @@
         </div>
       </section>
     </div>
+
+    <!-- World Map Section -->
+    <div class="pt-8 border-t border-gray-100 mt-8">
+      <h6 class="text-sm leading-5 font-semibold mb-4">
+        Geographic Distribution
+      </h6>
+      <dashboard-world-map
+        :location-data="locationData"
+        type="organizations"
+        :loading="loadingLocationData"
+        :error="locationError"
+        :show-location-list="true"
+        @location-selected="handleLocationSelected"
+        @country-selected="handleCountrySelected"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import {
+  computed, ref, onMounted, watch,
+} from 'vue';
 import AppDashboardOrganizationItem from '@/modules/dashboard/components/organization/dashboard-organization-item.vue';
 import AppDashboardCount from '@/modules/dashboard/components/dashboard-count.vue';
 import AppDashboardEmptyState from '@/modules/dashboard/components/dashboard-empty-state.vue';
 import AppDashboardWidgetHeader from '@/modules/dashboard/components/dashboard-widget-header.vue';
+import DashboardWorldMap from '@/modules/dashboard/components/world-map/dashboard-world-map.vue';
 import allOrganizations from '@/modules/organization/config/saved-views/views/all-organizations';
 import { filterQueryService } from '@/shared/modules/filters/services/filter-query.service';
-import { computed } from 'vue';
 import { mapGetters } from '@/shared/vuex/vuex.helpers';
 import { lfxCharts } from '@/config/charts';
 import LfChart from '@/ui-kit/chart/Chart.vue';
 import LfIcon from '@/ui-kit/icon/Icon.vue';
 import { dateHelper } from '@/shared/date-helper/date-helper';
+import { DashboardApiService } from '@/modules/dashboard/services/dashboard.api.service';
+import { useLfSegmentsStore } from '@/modules/lf/segments/store';
+import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 
 const {
   chartData, organizations, period, activeOrganizations, recentOrganizations,
 } = mapGetters('dashboard');
+
+const lsSegmentsStore = useLfSegmentsStore();
+const { selectedProjectGroup } = storeToRefs(lsSegmentsStore);
+const router = useRouter();
+
+// World map data
+const locationData = ref(null);
+const loadingLocationData = ref(false);
+const locationError = ref('');
 
 const mapData = (data: any[]) => data.map((item) => ({
   label: item.date,
@@ -224,6 +256,57 @@ const periodRange = computed(() => [
     .utc()
     .format('YYYY-MM-DD'),
 ]);
+
+// Methods
+const fetchLocationData = async () => {
+  if (loadingLocationData.value) return;
+
+  loadingLocationData.value = true;
+  locationError.value = '';
+
+  try {
+    const segments = selectedProjectGroup.value?.id ? [selectedProjectGroup.value.id] : [];
+    const data = await DashboardApiService.fetchLocationMapData({
+      type: 'organizations',
+      segments,
+    });
+    locationData.value = data;
+  } catch (error) {
+    locationError.value = 'Failed to load location data';
+    console.error('Error fetching location data:', error);
+  } finally {
+    loadingLocationData.value = false;
+  }
+};
+
+const handleLocationSelected = (location: any, entityType: string) => {
+  // Navigate to organizations list filtered by location
+  router.push({
+    name: 'organization',
+    query: filterQueryService().setQuery({
+      ...allOrganizations.config,
+      location: {
+        value: location.countryName,
+        operator: 'contains',
+      },
+    }),
+  });
+};
+
+const handleCountrySelected = (countryCode: string) => {
+  console.log('Country selected:', countryCode);
+  // Could be used for additional filtering or analytics
+};
+
+// Lifecycle
+onMounted(() => {
+  fetchLocationData();
+});
+
+// Watch for segment changes
+watch(selectedProjectGroup, () => {
+  fetchLocationData();
+});
 </script>
 
 <script lang="ts">

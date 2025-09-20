@@ -225,7 +225,7 @@ const fetch = (page) => {
 
   OrganizationService.fetchMergeSuggestions(1, currentOffset.value, props.query ?? {})
     .then((res) => {
-      currentOffset.value = +res.offset;
+      offset.value = +res.offset;
       count.value = res.count;
       [organizationsToMerge.value] = res.rows;
 
@@ -259,7 +259,7 @@ const ignoreSuggestion = () => {
     .then(() => {
       Message.success('Merging suggestion ignored successfully');
 
-      const nextIndex = currentOffset.value >= (count.value - 1) ? Math.max(count.value - 2, 0) : currentOffset.value;
+      const nextIndex = offset.value >= (count.value - 1) ? Math.max(count.value - 2, 0) : offset.value;
       fetch(nextIndex);
       changed.value = true;
     })
@@ -307,7 +307,7 @@ const mergeSuggestion = () => {
 
       loadingMessage();
 
-      const nextIndex = currentOffset.value >= (count.value - 1) ? Math.max(count.value - 2, 0) : currentOffset.value;
+      const nextIndex = offset.value >= (count.value - 1) ? Math.max(count.value - 2, 0) : offset.value;
       fetch(nextIndex);
       changed.value = true;
     })

@@ -31,12 +31,13 @@
           <div>
             <app-dashboard-members class="mb-8" />
             <app-dashboard-organizations class="mb-8" />
+            <app-location-stats-widget class="mb-8" title="Geographic Distribution" />
             <app-dashboard-activities class="mb-8" />
           </div>
         </div>
       </div>
       <div class="mt-auto mb-6 flex justify-center">
-        <lfx-footer class="px-2 max-w-3xl" />
+        <lfx-footer cookie-tracking class="px-2 max-w-3xl" />
       </div>
     </div>
     <aside
@@ -56,6 +57,7 @@ import {
 import AppDashboardActivities from '@/modules/dashboard/components/dashboard-activities.vue';
 import AppDashboardMembers from '@/modules/dashboard/components/dashboard-members.vue';
 import AppDashboardOrganizations from '@/modules/dashboard/components/dashboard-organizations.vue';
+import AppLocationStatsWidget from '@/modules/dashboard/components/location-stats-widget.vue';
 import AppDashboardFilters from '@/modules/dashboard/components/dashboard-filters.vue';
 import AppLfPageHeader from '@/modules/lf/layout/components/lf-page-header.vue';
 import AppDashboardProjectGroup from '@/modules/dashboard/components/dashboard-project-group.vue';

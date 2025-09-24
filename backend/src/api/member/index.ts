@@ -5,11 +5,15 @@ export default (app) => {
 
   app.post(`/member/export`, safeWrap(require('./memberExport').default))
 
+  app.get(`/member/location-stats`, safeWrap(require('./memberLocationStats').default))
+
   app.post(`/member`, safeWrap(require('./memberCreate').default))
   app.put(`/member/:id`, safeWrap(require('./memberUpdate').default))
   app.delete(`/member`, safeWrap(require('./memberDestroy').default))
   app.post(`/member/autocomplete`, safeWrap(require('./memberAutocomplete').default))
   app.get(`/member/active`, safeWrap(require('./memberActiveList').default))
+  app.get(`/member/bot-suggestions`, safeWrap(require('./memberBotSuggestionsList').default))
+
   app.get(`/member/:id`, safeWrap(require('./memberFind').default))
   app.get(`/member/github/:id`, safeWrap(require('./memberFindGithub').default))
   app.put(`/member/:memberId/merge`, safeWrap(require('./memberMerge').default))
